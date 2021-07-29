@@ -10,11 +10,10 @@ const sendEmail = async options => {
         }
     });
     const mailOptions = {
-        from: 'Bachir Kurdi <bachir098@gmail.com>',
-        to: options.email,
+        from: options.contact ? `${options.name} <${options.email}>` : process.env.EMAIL_FROM,
+        to: options.contact ? process.env.EMAIL_FROM : options.email,
         subject: options.subject,
         text: options.message,
-        // html:
     }
     console.log(process.env.EMAIL_PORT);
 

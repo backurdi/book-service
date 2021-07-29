@@ -41,7 +41,14 @@ const bookSchema = new mongoose.Schema({
 bookSchema.pre(/^find/, function (next) {
     this.populate({
         path: 'comments',
-        path: 'user'
+    });
+
+    next();
+});
+
+bookSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: 'user',
     });
 
     next();

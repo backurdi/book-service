@@ -14,13 +14,14 @@ const globalErrorHandler = require('./controllers/errorController');
 const userRouter = require('./routes/userRoutes');
 const bookRouter = require('./routes/bookRoutes');
 const commentRouter = require('./routes/commentRoutes');
+const contactRouter = require('./routes/contactRoutes');
 
 
 const app = express();
 
 //1) Global middleware
 
-// app.set('view engine', 'pug');
+app.set('view engine', 'pug');
 // app.set('views', path.join(__dirname, 'views'))
 
 // Cors rules
@@ -87,6 +88,7 @@ app.use((req, res, next) => {
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/books', bookRouter);
 app.use('/api/v1/comments', commentRouter);
+app.use('/api/v1/contact', contactRouter);
 
 app.all('*', (req, res, next) => {
 
