@@ -1,7 +1,7 @@
 {
-  "name": "natours",
+  "name": "app.readee",
   "version": "1.0.0",
-  "description": "Learning node, express and mongoDB",
+  "description": "Reading engagement application",
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
