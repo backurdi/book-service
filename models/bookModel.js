@@ -48,7 +48,7 @@ bookSchema.pre(/^find/, function (next) {
 
 bookSchema.pre(/^find/, function (next) {
     this.populate({
-        path: 'user',
+        path: 'user', 
     });
 
     next();
