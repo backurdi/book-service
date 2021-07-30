@@ -28,7 +28,9 @@ app.set('view engine', 'pug');
 const corsOptions = {
     origin: "https://www.app.readee.org/",
     methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
-    // other options
+    allowedHeaders: [
+        'Content-Type',
+      ],
 }
 
 app.use(cors(corsOptions));
