@@ -8,8 +8,6 @@ exports.getBook = factory.getOne(Books);
 exports.createBook = factory.createOne(Books);
 exports.updateBook = factory.updateOne(Books);
 
-exports.createBook = factory.createOne(Books);
-
 exports.createBook = catchAsync(async (req, res, next) => {
 
     const book = await Books.create({...req.body, user:req.user._id});

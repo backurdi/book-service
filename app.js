@@ -26,12 +26,12 @@ app.set('view engine', 'pug');
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
     // intercept OPTIONS method
     if ('OPTIONS' == req.method) {
-      res.send(200);
+        res.sendStatus(200);
     }
     else {
       next();
@@ -39,25 +39,6 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
-
-// Cors rules
-const corsOptions = {
-    origin: "https://www.app.readee.org/",
-    methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
-    allowedHeaders: [
-        'Content-Type',
-      ],
-}
-
-app.use(cors(corsOptions));
-
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Accept,Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    next();
-});
 
 //Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
