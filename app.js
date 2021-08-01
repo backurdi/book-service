@@ -1,13 +1,12 @@
 const express = require('express');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
+// const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const path = require('path');
 const cookieParser = require('cookie-parser')
-var cors = require('cors')
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -24,13 +23,13 @@ const app = express();
 app.set('view engine', 'pug');
 // app.set('views', path.join(__dirname, 'views'))
 
-var allowCrossDomain = function(req, res, next) {
+const allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
     // intercept OPTIONS method
-    if ('OPTIONS' == req.method) {
+    if (req.method === 'OPTIONS') {
         res.sendStatus(200);
     }
     else {
