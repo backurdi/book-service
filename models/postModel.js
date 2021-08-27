@@ -1,13 +1,19 @@
 const mongoose = require('mongoose');
 
-const commentSchema = new mongoose.Schema({
+const postSchema = new mongoose.Schema({
     text:{
         type:String,
-        required: [true, 'Comment must have some text']
+        required:[true, 'post must have some text']
     },
-    post:{
+    pagesFrom:Number,
+    pagesTo:Number,
+    book:{
         type: mongoose.Schema.ObjectId,
-        ref: 'Posts',
+        ref: 'Books',
+    },
+    club:{
+        type: mongoose.Schema.ObjectId,
+        ref: 'Clubs',
     },
     user:{
         type: mongoose.Schema.ObjectId,
@@ -26,8 +32,14 @@ const commentSchema = new mongoose.Schema({
         virtuals: true,
     },
     id: false
-})
+});
 
-const Comments = mongoose.model('Comments', commentSchema);
+postSchema.virtual('comments', {
+    ref: 'Comments',
+    foreignField: 'post',
+    localField: '_id'
+});
 
-module.exports = Comments;
+const Posts = mongoose.model('Posts', postSchema);
+
+module.exports = Posts;

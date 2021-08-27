@@ -51,21 +51,21 @@ exports.getOne = (Model, popOptions) => catchAsync(async (req, res, next) => {
 
     res.status(201).json({
         status: 'success',
-        data: {
-            data: doc
-        }
+        data: doc
     });
 });
 
-exports.getAll = Model => catchAsync(async (req, res, next) => {
-
+exports.getAll = (Model) => catchAsync(async (req, res, next) => {
     //To allow for nested GET reviews on tour (hack)
     let filter = {};
-    filter = {
-        user: req.user._id
+    if(req.params.bookId){
+        filter = {
+            book: req.params.bookId
+        }
     }
 
-    const doc = await Model.find(filter);
+    const query = Model.find(filter);
+    const doc = await query;
 
     //EXECUTE QUERY
     // const features = new APIFeatures(Model.find(filter), req.query)

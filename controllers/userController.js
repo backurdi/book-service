@@ -1,19 +1,16 @@
 const multer = require('multer');
-// const sharp = require('sharp');
+const sharp = require('sharp');
+const util = require('util');
+const fs = require('fs');
+const {uploadFile, getFileStream} = require('../utils/s3');
+
+const unlinkFile = util.promisify(fs.unlink)
+
 const User = require('./../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 
-// const multerStorage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'public/img/users');
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = file.mimetype.split('/')[1];
-//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-//   }
-// });
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
@@ -35,14 +32,24 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
     if (!req.file) return next();
 
     req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+    req.file.path = `public/img/users/${req.file.filename}`;
 
     await sharp(req.file.buffer)
-        .resize(500, 500)
-        .toFormat('jpeg')
-        .jpeg({
-            quality: 90
-        })
-        .toFile(`public/img/users/${req.file.filename}`);
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({
+        quality: 90
+    })
+    .toFile(req.file.path);
+    
+    next();
+});
+
+exports.uploadToS3 = catchAsync(async(req, res, next) =>{
+    const result = await uploadFile(req.file);
+    await unlinkFile(req.file.path);
+
+    req.imagePath = `${result.Key}`;
 
     next();
 });
@@ -55,6 +62,16 @@ const filterObj = (obj, ...allowedFields) => {
 
     return newObj;
 };
+
+// exports.getProfilePictureFromS3 = catchAsync(async(req, res, next)=>{
+//     const key = req.user.photo;
+    
+//     console.log(readStream);
+
+//     req.user.photo = readStream
+
+//     next();
+// });
 
 exports.getMe = (req, res, next) => {
     req.params.id = req.user.id;
@@ -79,7 +96,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         'name',
         'email',
     );
-    if (req.file) filteredBody.photo = req.file.filename;
+    if (req.imagePath) filteredBody.photo = `https://readee-profile-pictures.s3.eu-north-1.amazonaws.com/${req.imagePath}`;
 
     //3) Update user document
     const updatedUser = await User.findByIdAndUpdate(
@@ -88,7 +105,10 @@ exports.updateMe = catchAsync(async (req, res, next) => {
             new: true,
             runValidators: true,
         },
-    );
+    ).populate({
+        path:'clubs',
+        select:['name', 'photo']
+    });
 
     res.status(200).json({
         status: 'success',
@@ -112,9 +132,39 @@ exports.deleteMe =
     }, );
 
 exports.getAllUsers = factory.getAll(User);
-exports.getUser = factory.getOne(User);
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
+
+exports.getUser = catchAsync(async (req, res, next) => {
+    const query = User.findById(req.params.id).populate({
+        path:'clubs',
+        select:['name', 'photo']
+    });
+    const doc = await query;
+    // const photo = await getFileStream(req.user.photo);
+    doc.photo = req.user.photo;
+
+    if (!doc) {
+        return next(new AppError('No document found with that ID', 404));
+    }
+
+    res.status(201).json({
+        status: 'success',
+        data: doc
+    });
+});
+
+exports.joinClub = catchAsync(async(req, res, next)=>{
+    const user = await User.findByIdAndUpdate(req.user._id,{clubs:[...req.user.clubs, req.params.clubId]},{
+        new: true,
+        runValidators: true
+    });
+
+    res.status(200).json({
+        status: 'success',
+        data: user
+    })
+});
 
 exports.createUser = (req, res) => {
     res.status(500).json({

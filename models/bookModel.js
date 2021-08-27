@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Clubs = require('./clubModel');
 
 const bookSchema = new mongoose.Schema({
     title:{
@@ -13,46 +14,42 @@ const bookSchema = new mongoose.Schema({
         type:Number,
         required: [true, 'tell us number of pages']
     },
-    user:{
-        type:String,
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        required:[true, 'A book must be assigned to a user']
-    },
-    isCurrent:{
-        type:Boolean,
-        default:false
-    },
     image:String,
+    club: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Clubs',
+        required: [true, 'Book must have a club']
+    },
     bookType: {
         type:String,
-        enum:['BOOK','e-book','audio']
+        enum:['book','e-book','audio']
     },
     isbn:{
         type:String,
         required: [true, 'All books has an ISBN number']
     },
-    comments:[{
-        type: mongoose.Schema.ObjectId,
-        ref: 'Comments',
-    }, ],
+},{
+    toJSON: {
+        virtuals: true,
+    },
+    toObject: {
+        virtuals: true,
+    },
+    id: false
 });
 
-bookSchema.pre(/^find/, function (next) {
-    this.populate({
-        path: 'comments',
-    });
-
+bookSchema.pre(/^findByAnd/, async function (next) {
+    this.r = await this.findOne();
     next();
 });
 
-bookSchema.pre(/^find/, function (next) {
-    this.populate({
-        path: 'user', 
-    });
-
-    next();
-});
+// bookSchema.pre(/^find/, function (next) {
+//     this.populate({
+//       path: 'comments', 
+//     })
+  
+//     next();
+//   });
 
 const Books = mongoose.model('Books', bookSchema);
 

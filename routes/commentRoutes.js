@@ -1,9 +1,12 @@
 const express = require('express');
 const commentController = require('../controllers/commentController');
+const authController = require('../controllers/authController');
 
-const router = express.Router();
+const router = express.Router({mergeParams:true});
 
-router.post('/', commentController.addComment);
+router.use(authController.protect);
+
+router.route('/').get(commentController.getComments).post(commentController.setPostkUserIds, commentController.addComment);
 
 router
     .route('/:id')

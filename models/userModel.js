@@ -16,6 +16,19 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, 'Please provide a valid email']
   },
   photo: String,
+  clubs:[{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Clubs',
+  }],
+  invites:[{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Clubs',
+  }],
+  // friends:[{
+  //   name:{type:String},
+  //   image:{type:String},
+  //   books:[{name:{type:String}, image:{type:String}}]
+  // }],
   password: {
     type: String,
     required: [true, 'Please provide a password'],
@@ -96,8 +109,6 @@ userSchema.methods.createPasswordResetToken = function() {
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-
-  console.log({ resetToken }, this.passwordResetToken);
 
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 

@@ -150,16 +150,21 @@ exports.isLoggedIn = async (req, res, next) => {
     next();
 };
 
-// exports.restrictTo = (...roles) => {
-//     return (req, res, next) => {
-//         // roles ['admin', 'lead-guide']. role='user'
-//         if (!roles.includes(req.user.role)) {
-//             return next(new AppError('You do not have permission to perform this action', 403))
-//         }
+exports.restrictTo = (...roles) => {
+    return (req, res, next) => {
+        // roles ['admin', 'lead-guide']. role='user'
+        if (!roles.includes(req.user.role)) {
+            return next(new AppError('You do not have permission to perform this action', 403))
+        }
 
-//         next();
-//     }
-// }
+        next();
+    }
+}
+
+// Insure that it is only owner of club that can update and delete club
+exports.clubManageRights = (req, res, next) =>{
+    
+}
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
     //1) Get user based on email
