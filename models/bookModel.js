@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Clubs = require('./clubModel');
 
 const bookSchema = new mongoose.Schema({
     title:{

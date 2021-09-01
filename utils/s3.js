@@ -6,16 +6,12 @@ dotenv.config({
     path: './config.env'
 });
 
-const bucketName = process.env.AWS_BUCKET_NAME;
-const region = process.env.AWS_BUCKET_REGION;
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_ACCESS_SECRET_KEY;
+let bucketName;
+let region;
+let accessKeyId;
+let secretAccessKey;
 
-const s3 = new S3({
-    region,
-    accessKeyId,
-    secretAccessKey
-})
+let s3;
 
 exports.uploadFile = (file) => {
     const fileStream = fs.createReadStream(file.path)
@@ -36,4 +32,29 @@ exports.getFileStream = (fileKey) => {
     }
   
     return s3.getObject(downloadParams);
-  }
+}
+
+exports.setConfigVars = (configType) =>{
+    switch (configType) {
+        case 'profilePic':
+            bucketName = process.env.AWS_PROFILE_BUCKET_NAME;
+            region = process.env.AWS_PROFILE_BUCKET_REGION;
+            accessKeyId = process.env.AWS_PROFILE_ACCESS_KEY;
+            secretAccessKey = process.env.AWS_PROFILE_ACCESS_SECRET_KEY;
+            break;
+        case 'clubPicture':
+            bucketName = process.env.AWS_CLUB_BUCKET_NAME;
+            region = process.env.AWS_CLUB_BUCKET_REGION;
+            accessKeyId = process.env.AWS_CLUB_ACCESS_KEY;
+            secretAccessKey = process.env.AWS_CLUB_ACCESS_SECRET_KEY;
+            break;
+        default:
+            break;
+    }
+
+    s3 = new S3({
+        region,
+        accessKeyId,
+        secretAccessKey
+    })
+}

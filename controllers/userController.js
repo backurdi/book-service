@@ -1,58 +1,8 @@
-const multer = require('multer');
-const sharp = require('sharp');
-const util = require('util');
-const fs = require('fs');
-const {uploadFile, getFileStream} = require('../utils/s3');
-
-const unlinkFile = util.promisify(fs.unlink)
-
 const User = require('./../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
-
-const multerStorage = multer.memoryStorage();
-
-const multerFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image')) {
-        cb(null, true);
-    } else {
-        cb(new AppError('Not an image! Please upload only images.', 400), false);
-    }
-};
-
-const upload = multer({
-    storage: multerStorage,
-    fileFilter: multerFilter
-});
-
-exports.uploadUserPhoto = upload.single('photo');
-
-exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
-    if (!req.file) return next();
-
-    req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
-    req.file.path = `public/img/users/${req.file.filename}`;
-
-    await sharp(req.file.buffer)
-    .resize(500, 500)
-    .toFormat('jpeg')
-    .jpeg({
-        quality: 90
-    })
-    .toFile(req.file.path);
-    
-    next();
-});
-
-exports.uploadToS3 = catchAsync(async(req, res, next) =>{
-    const result = await uploadFile(req.file);
-    await unlinkFile(req.file.path);
-
-    req.imagePath = `${result.Key}`;
-
-    next();
-});
+const {setConfigVars} = require('../utils/s3');
 
 const filterObj = (obj, ...allowedFields) => {
     const newObj = {};
@@ -63,15 +13,11 @@ const filterObj = (obj, ...allowedFields) => {
     return newObj;
 };
 
-// exports.getProfilePictureFromS3 = catchAsync(async(req, res, next)=>{
-//     const key = req.user.photo;
-    
-//     console.log(readStream);
+exports.setS3Config = (req, res, next)=>{
+    setConfigVars('profilePic');
 
-//     req.user.photo = readStream
-
-//     next();
-// });
+    next()
+}
 
 exports.getMe = (req, res, next) => {
     req.params.id = req.user.id;
@@ -96,7 +42,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         'name',
         'email',
     );
-    if (req.imagePath) filteredBody.photo = `https://readee-profile-pictures.s3.eu-north-1.amazonaws.com/${req.imagePath}`;
+    if (req.photo) filteredBody.photo = `https://readee-profile-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
 
     //3) Update user document
     const updatedUser = await User.findByIdAndUpdate(
@@ -131,18 +77,24 @@ exports.deleteMe =
         })
     }, );
 
-exports.getAllUsers = factory.getAll(User);
-exports.updateUser = factory.updateOne(User);
-exports.deleteUser = factory.deleteOne(User);
+    exports.getAllUsers = factory.getAll(User);
+    exports.updateUser = factory.updateOne(User);
+    exports.deleteUser = factory.deleteOne(User);
+    
+
 
 exports.getUser = catchAsync(async (req, res, next) => {
     const query = User.findById(req.params.id).populate({
         path:'clubs',
         select:['name', 'photo']
-    });
+    }).populate( {path:'invites', select:['name', 'photo']});
     const doc = await query;
-    // const photo = await getFileStream(req.user.photo);
+
     doc.photo = req.user.photo;
+    
+    // doc.clubs.forEach(club=>{
+    //     club.photo = `${club.photo}`;
+    // });
 
     if (!doc) {
         return next(new AppError('No document found with that ID', 404));

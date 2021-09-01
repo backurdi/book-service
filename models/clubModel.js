@@ -5,6 +5,10 @@ const clubSchema = new mongoose.Schema({
         type:String,
         required:[true, 'Club must have a name']
     },
+    owner:{
+        type: mongoose.Schema.ObjectId,
+        ref: 'Users',
+    },
     photo: {
         type:String,
         default: 'default.png'
@@ -40,6 +44,11 @@ clubSchema.virtual('posts', {
     ref: 'Posts',
     foreignField: 'club',
     localField: '_id'
+});
+
+clubSchema.pre('remove', function(next) {
+    // Remove all the assignment docs that reference the removed person.
+    this.model('User').remove({ $pull: { clubs: this._id, invites: this._id} });
 });
 
 const Clubs = mongoose.model('Clubs', clubSchema);
