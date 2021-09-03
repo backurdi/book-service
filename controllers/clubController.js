@@ -58,7 +58,7 @@ exports.createClub = catchAsync(async (req, res, next)=>{
 exports.inviteUsers = catchAsync(async (req, res, next)=>{
     if(req.body.invites){
         req.body.invites.forEach(async (invite) => {
-            await Users.updateOne({_id:invite}, { $push: { invites: req.club } }) 
+            await Users.updateOne({_id:invite}, { $push: { invites: req.params.clubId } }) 
         });
     }
 
@@ -72,7 +72,7 @@ exports.clubInvitesAnswer = catchAsync(async (req,res,next)=>{
     const {club, accepted} = req.body;
     let acceptedClub;
 
-    user.invites.splice(user.invites.indexOf(club, 1));
+    user.invites.splice(user.invites.indexOf(club), 1);
     
     if(accepted){
         user.clubs.push(club);
