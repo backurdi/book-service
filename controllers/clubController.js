@@ -101,7 +101,16 @@ exports.getClub = catchAsync(async (req,res,next)=>{
             path:'comments',
             model:'Comments',
             options: { sort: { 'createdAt': -1 } },
-        }
+        },
+    });
+    query = query.populate({path: 'posts',
+        model: 'Posts',
+        options: { sort: { 'createdAt': -1 } },
+        populate: {
+            path:'user',
+            model:'User',
+            select:['name', 'photo']
+        },
     });
     query = query.populate('members');
 

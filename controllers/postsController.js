@@ -22,7 +22,9 @@ exports.updatePost = factory.updateOne(Posts);
 exports.deletePost = factory.deleteOne(Posts);
 
 exports.createPost = catchAsync(async (req, res, next) => {
-    req.body.photo = `https://redee-post-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
+    if(req.photo){
+        req.body.photo = `https://redee-${req.s3FileName}-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
+    }
     const doc = await Posts.create(req.body);
 
     res.status(201).send({

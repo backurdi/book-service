@@ -60,6 +60,7 @@ exports.resizePhoto = catchAsync(async (req, res, next) => {
 });
 
 exports.uploadToS3 = catchAsync(async(req, res, next) =>{
+    if (!req.file) return next();
     const result = await uploadFile(req.file);
     await unlinkFile(req.file.path);
 

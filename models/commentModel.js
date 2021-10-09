@@ -14,10 +14,7 @@ const commentSchema = new mongoose.Schema({
         ref: 'Users',
         required:[true, 'comment must have a user']
     },
-    photo: {
-        type:String,
-        default: 'default.png'
-    },
+    photo: String,
     createdAt: {
         type: Date,
         default: Date.now(),
