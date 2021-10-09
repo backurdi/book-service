@@ -64,7 +64,7 @@ exports.getAll = (Model) => catchAsync(async (req, res, next) => {
         }
     }
 
-    const query = Model.find(filter);
+    const query = Model.find(filter).sort('createdAt');
     const doc = await query;
 
     //EXECUTE QUERY

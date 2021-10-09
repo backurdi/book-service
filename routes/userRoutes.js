@@ -29,17 +29,22 @@ router.patch(
 );
 router.delete('/deleteMe', userController.deleteMe);
 
-// router.use(authController.restrictTo('admin'));
+router.patch('/teacher', userController.setTeacher);
+
+// router.use(authController.restrictTo('Teacher'));
+router.get('/students',authController.restrictTo('Teacher'), userController.getStudents);
 
 router
-    .route('/')
-    .get(userController.getAllUsers)
-    .post(userController.createUser);
+.route('/')
+.get(userController.getAllUsers)
+.post(userController.createUser);
 
 router
-    .route('/:id')
-    .get(userController.getUser)
-    .patch(userController.updateUser)
-    .delete(userController.deleteUser);
+.route('/:id')
+.get(userController.getUser)
+.patch(userController.updateUser)
+.delete(userController.deleteUser);
+
+
 
 module.exports = router;

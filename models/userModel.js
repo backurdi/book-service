@@ -46,6 +46,15 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not the same!'
     }
   },
+  role:{
+    type:String,
+    enum:['Student', 'Teacher'],
+    default:'Student'
+  },
+  teacher:{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+  },
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,

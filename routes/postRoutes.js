@@ -2,6 +2,7 @@ const express = require('express');
 const postController = require('../controllers/postsController');
 const authController = require('../controllers/authController');
 const commentRouter = require('./commentRoutes');
+const photoMidleware = require('../utils/midleware/photo');
 
 const router = express.Router();
 
@@ -12,7 +13,13 @@ router.use('/:postId/comments', commentRouter);
 router
     .route('/')
     .get(postController.getAllPosts)
-    .post(postController.setUserIds, postController.createPost);
+    .post(postController.setS3Config,
+        photoMidleware.uploadPhoto,
+        photoMidleware.resizePhoto,
+        photoMidleware.uploadToS3,
+        postController.setUserId,
+        postController.createPost
+        );
 
 router
     .route('/:id')

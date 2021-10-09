@@ -16,6 +16,7 @@ exports.deleteClub = factory.deleteOne(Clubs);
 
 exports.setS3Config = (req, res, next)=>{
     setConfigVars('clubPicture');
+    req.s3FileName = 'club';
 
     next()
 }

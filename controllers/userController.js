@@ -15,6 +15,7 @@ const filterObj = (obj, ...allowedFields) => {
 
 exports.setS3Config = (req, res, next)=>{
     setConfigVars('profilePic');
+    req.s3FileName = 'profile';
 
     next()
 }
@@ -124,3 +125,27 @@ exports.createUser = (req, res) => {
         message: 'This route is not defined! Please use /signup instead'
     })
 };
+
+exports.setTeacher = catchAsync(async(req, res, next) => {
+    const user = await User.findByIdAndUpdate(req.user._id, {teacher:req.body.teacher},{
+        new: true,
+        runValidators: true
+    });
+
+    res.status(200).json({
+        status: 'success',
+        data: user
+    })
+});
+
+exports.getStudents = catchAsync(async(req, res, next) => {
+    const students = await User.find({teacher: req.user._id}).populate({
+        path:'clubs',
+        select:['name', 'photo']
+    });
+
+    res.status(200).json({
+        status: 'success',
+        data: students
+    })
+})

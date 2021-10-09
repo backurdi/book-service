@@ -20,6 +20,7 @@ const postSchema = new mongoose.Schema({
         ref: 'Users',
         required:[true, 'comment must have a user']
     },
+    photo: String,
     createdAt: {
         type: Date,
         default: Date.now(),
