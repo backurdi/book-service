@@ -20,7 +20,13 @@ router.route('/')
 
 router
     .route('/:id')
-    .patch(commentController.updateComment)
+    .patch(
+        commentController.setS3Config,
+        photoMidleware.uploadPhoto,
+        photoMidleware.resizePhoto,
+        photoMidleware.uploadToS3,
+        commentController.setPostUserIds,
+        commentController.updateComment)
     .delete(commentController.deleteComment);
 
 module.exports = router;

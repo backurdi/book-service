@@ -100,6 +100,11 @@ exports.getClub = catchAsync(async (req,res,next)=>{
         populate: {
             path:'comments',
             model:'Comments',
+            populate: {
+                path:'user',
+                model:'User',
+                select:['name', 'photo']
+            },
             options: { sort: { 'createdAt': -1 } },
         },
     });
