@@ -24,7 +24,12 @@ router
 router
     .route('/:id')
     .get(postController.getPost)
-    .patch(postController.updatePost)
+    .patch(postController.setS3Config,
+        photoMidleware.uploadPhoto,
+        photoMidleware.resizePhoto,
+        photoMidleware.uploadToS3,
+        postController.setUserId,
+        postController.updatePost)
     .delete(postController.deletePost);
 
 module.exports = router;
