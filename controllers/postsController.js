@@ -63,7 +63,13 @@ exports.createPost = catchAsync(async (req, res, next) => {
     if(req.photo){
         req.body.photo = `https://redee-${req.s3FileName}-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
     }
-    const doc = await Posts.create(req.body);
+    const newPost = await Posts.create(req.body);
+
+    const doc = await Posts.findById(newPost._id).populate({
+        path:'user',
+        model:'User',
+        select:['name', 'photo']
+    })
 
     res.status(201).send({
         status: 'success',
