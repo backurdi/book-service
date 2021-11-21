@@ -26,7 +26,13 @@ exports.addComment = catchAsync(async(req, res, next)=>{
     if(req.photo){
         req.body.photo = `https://redee-post-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
     }
-    const doc = await Comments.create(req.body);
+    const newComment = await Comments.create(req.body);
+    
+    const doc = await Comments.findById(newComment._id).populate({
+        path:'user',
+        model:'User',
+        select:['name', 'photo']
+    })
     
     res.status(201).send({
         status: 'success',

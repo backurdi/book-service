@@ -16,8 +16,10 @@ const commentSchema = new mongoose.Schema({
     },
     photo: String,
     createdAt: {
+        required: true,
         type: Date,
-        default: Date.now(),
+        set: Date.now,
+        default: Date.now
     },
 },{
     toJSON: {
