@@ -22,7 +22,12 @@ exports.setS3Config = (req, res, next)=>{
 }
 
 exports.usersForInvite = catchAsync(async (req,res,next)=>{
-    const userForInvites = await Users.find({_id: { $ne: req.user._id }, clubs: {$ne: req.params.clubId}, invites: {$ne: req.params.clubId}}).select('name photo');
+    let userForInvites;
+    if(req.params.clubId && req.params.clubId !== 'undefined'){
+        userForInvites = await Users.find({_id: { $ne: req.user._id }, clubs: {$ne: req.params.clubId}, role:{$ne: 'Teacher'}, invites: {$ne: req.params.clubId}}).select('name photo');
+    }else{
+        userForInvites = await Users.find({_id: { $ne: req.user._id}, role: {$ne: 'Teacher' }}).select('name photo');
+    }
     
    res.status(200).json({
        message: 'success',
