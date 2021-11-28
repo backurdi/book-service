@@ -9,6 +9,9 @@ const bookSchema = new mongoose.Schema({
         type:Number,
         default: 0
     },
+    description:{
+        type:String,
+    },
     pagesTotal:{
         type:Number,
         required: [true, 'tell us number of pages']
@@ -26,6 +29,12 @@ const bookSchema = new mongoose.Schema({
     isbn:{
         type:String,
         required: [true, 'All books has an ISBN number']
+    },
+    createdAt: {
+        required: true,
+        type: Date,
+        set: Date.now,
+        default: Date.now
     },
 },{
     toJSON: {
