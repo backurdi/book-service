@@ -39,7 +39,7 @@ exports.createClub = catchAsync(async (req, res, next)=>{
     const body = {};
 
     body.name = req.body.name;
-    body.photo = `https://readee-club-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
+    body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
     body.owner = req.user._id;
 
     const club = await Clubs.create(body);

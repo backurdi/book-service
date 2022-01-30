@@ -15,6 +15,7 @@ const userRouter = require('./routes/userRoutes');
 const bookRouter = require('./routes/bookRoutes');
 const commentRouter = require('./routes/commentRoutes');
 const contactRouter = require('./routes/contactRoutes');
+const imageRouter = require('./routes/imageRoutes');
 const clubRouter = require('./routes/clubRoutes');
 const postRouter = require('./routes/postRoutes');
 
@@ -90,6 +91,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/books', bookRouter);
 app.use('/api/v1/comments', commentRouter);
 app.use('/api/v1/contact', contactRouter);
+app.use('/api/v1/images', imageRouter);
 app.use('/api/v1/clubs', clubRouter);
 app.use('/api/v1/posts', postRouter);
 

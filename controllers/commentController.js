@@ -24,7 +24,7 @@ exports.deleteComment = factory.deleteOne(Comments);
 
 exports.addComment = catchAsync(async(req, res, next)=>{
     if(req.photo){
-        req.body.photo = `https://redee-post-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
+        req.body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
     }
     const newComment = await Comments.create(req.body);
     

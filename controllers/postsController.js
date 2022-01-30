@@ -28,7 +28,7 @@ exports.updatePost = catchAsync(async (req, res, next) => {
     bodyFields.forEach(field=>{body[field] = req.body[field]});
 
     if(req.photo){
-        body.photo = `https://redee-${req.s3FileName}-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
+        body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
     }
 
     const doc = await Posts.findByIdAndUpdate(req.params.id, body, {
@@ -61,7 +61,7 @@ exports.updatePost = catchAsync(async (req, res, next) => {
 
 exports.createPost = catchAsync(async (req, res, next) => {
     if(req.photo){
-        req.body.photo = `https://redee-${req.s3FileName}-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
+        req.body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
     }
     const newPost = await Posts.create(req.body);
 

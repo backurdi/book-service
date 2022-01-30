@@ -32,11 +32,11 @@ exports.uploadFile = (file) => {
 
 exports.getFileStream = (fileKey) => {
     const downloadParams = {
-      Key: fileKey,
-      Bucket: bucketName
+        Key: fileKey,
+        Bucket: bucketName
     }
   
-    return s3.getObject(downloadParams);
+    return s3.getObject(downloadParams).createReadStream();
 }
 
 // Remove this function and add the bucketName to the req
