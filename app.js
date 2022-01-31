@@ -25,7 +25,7 @@ const app = express();
 //1) Global middleware
 
 app.set('view engine', 'pug');
-// app.set('views', path.join(__dirname, 'views'))
+// app.set('views', path.join(__dirname, 'views' ))
 
 const allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
