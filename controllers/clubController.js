@@ -85,10 +85,9 @@ exports.clubInvitesAnswer = catchAsync(async (req,res,next)=>{
         await Users.findByIdAndUpdate(user._id, {invites:user.invites, clubs: user.clubs})
         acceptedClub = await Clubs.findById(club);
     }else{
+        await Users.findByIdAndUpdate(user._id, {invites:user.invites})
         acceptedClub = club;
     }
-
-
 
     res.status(201).json({
         message:'success',
