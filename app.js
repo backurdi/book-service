@@ -43,6 +43,7 @@ app.set('view engine', 'pug');
 // };
 
 app.use(cors());
+app.options('*', cors())
 
 // app.use(allowCrossDomain);
 
