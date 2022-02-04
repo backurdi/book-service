@@ -41,9 +41,9 @@ app.set('view engine', 'pug');
 //       next();
 //     }
 // };
-
-app.use(cors({ origin: "https://www.app.reaflect.com", credentials: true }))
-app.options('*', cors())
+const origins = process.env.URL.split(' ')
+app.use(cors({ origin: origins, credentials: true }));
+app.options('*', cors());
 
 // app.use(allowCrossDomain);
 
