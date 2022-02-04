@@ -7,7 +7,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const path = require('path');
 const cookieParser = require('cookie-parser')
-// const cors = require('cors');
+const cors = require('cors');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -28,24 +28,24 @@ const app = express();
 app.set('view engine', 'pug');
 // app.set('views', path.join(__dirname, 'views' ))
 
-const allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'https://www.app.reaflect.com');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Origin, X-Requested, Content-Type, Accept Authorization');
+// const allowCrossDomain = function(req, res, next) {
+//     res.header('Access-Control-Allow-Origin', 'https://www.app.reaflect.com');
+//     res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE,OPTIONS');
+//     res.header('Access-Control-Allow-Headers', 'Content-Type, Origin, X-Requested, Content-Type, Accept Authorization');
 
-    // intercept OPTIONS method
-    if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
-    }
-    else {
-      next();
-    }
-};
+//     // intercept OPTIONS method
+//     if (req.method === 'OPTIONS') {
+//         res.sendStatus(200);
+//     }
+//     else {
+//       next();
+//     }
+// };
 
-// app.use(cors());
+app.use(cors({ origin: "https://www.app.reaflect.com", credentials: true }))
 // app.options('*', cors())
 
-app.use(allowCrossDomain);
+// app.use(allowCrossDomain);
 
 //Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
