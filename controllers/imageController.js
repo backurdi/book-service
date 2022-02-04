@@ -17,6 +17,7 @@ exports.setS3Config = (req, res, next)=>{
 
 exports.getImage = catchAsync(async(req, res, next)=>{
     const {key} = req.params
+    console.log(key);
     const readStream = getFileStream(key)
       
         readStream.pipe(res)
