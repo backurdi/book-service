@@ -7,7 +7,7 @@ exports.setS3Config = (req, res, next)=>{
         setConfigVars('clubPicture');
     }else if(key.includes('profile')){
         setConfigVars('profilePic');
-    }else if(key.includes('post')){
+    }else if(key.includes('post' || 'comment')){
         setConfigVars('postPicture');
     }
     req.s3FileName = 'club';
