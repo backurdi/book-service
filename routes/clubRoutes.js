@@ -21,7 +21,11 @@ router
 router
     .route('/:id')
     .get(clubController.getClub)
-    .patch(clubController.updateClub)
+    .patch(clubController.setS3Config,
+        photoMidleware.uploadPhoto,
+        photoMidleware.resizePhoto,
+        photoMidleware.uploadToS3,
+        clubController.updateClub)
     .delete(clubController.deleteClub);
 
 router.post('/answerInvite', clubController.clubInvitesAnswer);

@@ -3,6 +3,7 @@ const Users = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const {setConfigVars} = require('../utils/s3');
+const AppError = require('../utils/appError');
 
 exports.setUserId = (req, res, next) => {
     if (!req.body.user) req.body.user = req.user.id;
@@ -11,8 +12,34 @@ exports.setUserId = (req, res, next) => {
 }
 
 exports.getAllClubs = factory.getAll(Clubs);
-exports.updateClub = factory.updateOne(Clubs);
 exports.deleteClub = factory.deleteOne(Clubs);
+exports.updateClub = catchAsync(async (req, res, next) => {
+    const bodyFields = Object.keys(req.body).filter(field=> req.body[field] !== '0' && req.body[field] !== '');
+    const body = {};
+    
+    bodyFields.forEach(field=>{body[field] = req.body[field]});
+    
+    if(req.photo){
+        body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
+    }
+
+    let populateQuery = Clubs.findByIdAndUpdate(req.params.id, body, {
+        new: true,
+        runValidators: true,
+    });
+    populateQuery = populateClub(populateQuery);
+
+    const doc = await populateQuery
+
+    if (!doc) {
+        return next(new AppError('No document found with that ID', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: doc
+    });
+});
 
 exports.setS3Config = (req, res, next)=>{
     setConfigVars('clubPicture');
@@ -96,9 +123,21 @@ exports.clubInvitesAnswer = catchAsync(async (req,res,next)=>{
 });
 
 exports.getClub = catchAsync(async (req,res,next)=>{
-    let query = Clubs.findById(req.params.id);
-    query = query.populate('books');
-    query = query.populate({path: 'posts',
+    let populateQuery = Clubs.findById(req.params.id);
+    populateQuery = populateClub(populateQuery);
+
+    const doc = await populateQuery;
+
+    res.status(200).json({
+        status: 'success',
+        data: doc,
+    });
+    
+});
+
+function populateClub(populateQuery){
+    populateQuery = populateQuery.populate('books');
+    populateQuery = populateQuery.populate({path: 'posts',
         model: 'Posts',
         options: { sort: { 'createdAt': -1 } },
         populate: {
@@ -112,7 +151,7 @@ exports.getClub = catchAsync(async (req,res,next)=>{
             options: { sort: { 'createdAt': -1 } },
         },
     });
-    query = query.populate({path: 'posts',
+    populateQuery = populateQuery.populate({path: 'posts',
         model: 'Posts',
         options: { sort: { 'createdAt': -1 } },
         populate: {
@@ -121,13 +160,7 @@ exports.getClub = catchAsync(async (req,res,next)=>{
             select:['name', 'photo']
         },
     });
-    query = query.populate('members');
+    populateQuery = populateQuery.populate('members');
 
-    const doc = await query;
-
-    res.status(200).json({
-        status: 'success',
-        data: doc,
-    });
-    
-});
+    return populateQuery;
+}
