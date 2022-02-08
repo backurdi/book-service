@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Comments = require('./commentModel');
 
 const postSchema = new mongoose.Schema({
     text:{
@@ -27,6 +28,14 @@ const postSchema = new mongoose.Schema({
         set: Date.now,
         default: Date.now
     },
+    subscriptions:[{
+        endpoint: { type: String, unique: true, required: false },
+        expirationTime: { type: Number, required: false },
+        keys: {
+          auth: String,
+          p256dh: String,
+        },
+    }]
 },{
     toJSON: {
         virtuals: true,
@@ -42,6 +51,12 @@ postSchema.virtual('comments', {
     foreignField: 'post',
     localField: '_id'
 });
+
+postSchema.post('deleteOne', { document: true, query: false }, async function() {
+    await Comments.remove({post:this._id});
+  
+    
+  });
 
 
 const Posts = mongoose.model('Posts', postSchema);

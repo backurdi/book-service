@@ -19,6 +19,7 @@ const contactRouter = require('./routes/contactRoutes');
 const imageRouter = require('./routes/imageRoutes');
 const clubRouter = require('./routes/clubRoutes');
 const postRouter = require('./routes/postRoutes');
+const notificationRouter = require('./routes/notificationRoutes');
 
 
 const app = express();
@@ -95,6 +96,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/books', bookRouter);
 app.use('/api/v1/comments', commentRouter);
 app.use('/api/v1/contact', contactRouter);
+app.use('/api/v1/notification', notificationRouter);
 app.use('/api/v1/images', imageRouter);
 app.use('/api/v1/clubs', clubRouter);
 app.use('/api/v1/posts', postRouter);

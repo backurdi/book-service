@@ -3,15 +3,17 @@ const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
 
 exports.deleteOne = Model => catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndDelete(req.params.id);
-
-    if (!doc) {
-        return next(new AppError('No document found with that ID', 404));
-    }
-
+    const doc = await Model.findOne({_id:req.params.id}).exec();
+  
+      
+      if (!doc) {
+          return next(new AppError('No document found with that ID', 404));
+        }
+        
+    const deleteResponse = await doc.deleteOne();
     res.status(204).json({
         status: 'success',
-        data: null
+        data: deleteResponse
     });
 });
 

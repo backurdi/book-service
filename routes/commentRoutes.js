@@ -1,6 +1,7 @@
 const express = require('express');
 const commentController = require('../controllers/commentController');
 const authController = require('../controllers/authController');
+const notificationController = require('../controllers/notificationController');
 const photoMidleware = require('../utils/midleware/photo');
 
 const router = express.Router({mergeParams:true});
@@ -15,7 +16,9 @@ router.route('/')
         photoMidleware.resizePhoto,
         photoMidleware.uploadToS3,
         commentController.setPostUserIds,
-        commentController.addComment
+        commentController.addComment,
+        notificationController.setSubscriptionOnPost,
+        notificationController.commentNotification
         );
 
 router

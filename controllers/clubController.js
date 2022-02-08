@@ -148,7 +148,7 @@ function populateClub(populateQuery){
                 model:'User',
                 select:['name', 'photo']
             },
-            options: { sort: { 'createdAt': -1 } },
+            options: { sort: { 'createdAt': 1 } },
         },
     });
     populateQuery = populateQuery.populate({path: 'posts',

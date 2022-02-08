@@ -43,7 +43,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         'name',
         'email',
     );
-    console.log()
     if (req.photo) filteredBody.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
 
     //3) Update user document

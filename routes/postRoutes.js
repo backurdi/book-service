@@ -1,6 +1,7 @@
 const express = require('express');
 const postController = require('../controllers/postsController');
 const authController = require('../controllers/authController');
+const notificationController = require('../controllers/notificationController');
 const commentRouter = require('./commentRoutes');
 const photoMidleware = require('../utils/midleware/photo');
 
@@ -18,7 +19,8 @@ router
         photoMidleware.resizePhoto,
         photoMidleware.uploadToS3,
         postController.setUserId,
-        postController.createPost
+        postController.createPost,
+        notificationController.postNotification,
         );
 
 router

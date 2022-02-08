@@ -34,10 +34,8 @@ exports.addComment = catchAsync(async(req, res, next)=>{
         select:['name', 'photo']
     })
     
-    res.status(201).send({
-        status: 'success',
-        data: doc
-    });
+    req.comment = doc;
+    next()
 })
 
 exports.updateComment = catchAsync(async (req, res, next)=>{

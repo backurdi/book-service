@@ -63,7 +63,14 @@ exports.createPost = catchAsync(async (req, res, next) => {
     if(req.photo){
         req.body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
     }
+
+    
     const newPost = await Posts.create(req.body);
+    
+        await Posts.findByIdAndUpdate(
+            {_id: newPost._id}, 
+        {$addToSet: {subscriptions: req.user.subscription}}, 
+        {new: true})
 
     const doc = await Posts.findById(newPost._id).populate({
         path:'user',
@@ -75,4 +82,6 @@ exports.createPost = catchAsync(async (req, res, next) => {
         status: 'success',
         data: doc
     });
+
+    next();
 });
