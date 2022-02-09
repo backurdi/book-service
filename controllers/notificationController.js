@@ -19,7 +19,7 @@ exports.subscribe = catchAsync(async (req, res, next)=>{
     const subscription = req.body;
     await User.findByIdAndUpdate(req.user._id, {subscription});
   
-    // Send 201 - resource created
+    // Send 201 - when resource created
     res.status(201).json({});
   });
 
