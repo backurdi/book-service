@@ -6,6 +6,11 @@ const router = express.Router();
 
 router.use(authController.protect);
 
-router.post('/', notificationController.subscribe);
+router
+  .route('/')
+  .get(notificationController.getNotifications)
+  .post(notificationController.subscribe);
+
+router.route('/:id').patch(notificationController.setReadOnNotification);
 
 module.exports = router;

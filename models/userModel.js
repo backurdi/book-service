@@ -6,42 +6,46 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please tell us your name!']
+    required: [true, 'Please tell us your name!'],
   },
   email: {
     type: String,
     required: [true, 'Please provide your email'],
     unique: true,
     lowercase: true,
-    validate: [validator.isEmail, 'Please provide a valid email']
+    validate: [validator.isEmail, 'Please provide a valid email'],
   },
   photo: String,
-  clubs:[{
-    type: mongoose.Schema.ObjectId,
-    ref: 'Clubs',
-  }],
-  invites:[{
-    type: mongoose.Schema.ObjectId,
-    ref: 'Clubs',
-  }],
+  clubs: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Clubs',
+    },
+  ],
+  invites: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Clubs',
+    },
+  ],
   // friends:[{
   //   name:{type:String},
   //   image:{type:String},
   //   books:[{name:{type:String}, image:{type:String}}]
   // }],
-  subscription:{
-      endpoint: { type: String, unique: true, required: false },
-      expirationTime: { type: Number, required: false },
-      keys: {
-        auth: String,
-        p256dh: String,
-      },
+  subscription: {
+    endpoint: { type: String, unique: false, required: false },
+    expirationTime: { type: Number, required: false },
+    keys: {
+      auth: String,
+      p256dh: String,
+    },
   },
   password: {
     type: String,
     required: [true, 'Please provide a password'],
     minlength: 8,
-    select: false
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -51,15 +55,15 @@ const userSchema = new mongoose.Schema({
       validator: function(el) {
         return el === this.password;
       },
-      message: 'Passwords are not the same!'
-    }
+      message: 'Passwords are not the same!',
+    },
   },
-  role:{
-    type:String,
-    enum:['Student', 'Teacher'],
-    default:'Student'
+  role: {
+    type: String,
+    enum: ['Student', 'Teacher'],
+    default: 'Student',
   },
-  teacher:{
+  teacher: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
   },
@@ -69,8 +73,8 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
-    select: false
-  }
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function(next) {
