@@ -47,7 +47,7 @@ exports.postNotification = (req, res, next) => {
 exports.getNotifications = catchAsync(async (req, res, next) => {
   let notificationsQuery = Notifications.find({
     receiver: req.user._id,
-  });
+  }).sort({ createdAt: -1 });
 
   notificationsQuery = paginate(notificationsQuery, req.query);
 
