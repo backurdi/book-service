@@ -104,6 +104,9 @@ exports.commentNotification = catchAsync(async (req, res, next) => {
       req.app.io.emit(`notification ${usersToNotify[i]}`, {
         notifications: notification,
       });
+      req.pushNotification = true;
+    } else {
+      req.pushNotification = false;
     }
   }
 
@@ -111,22 +114,24 @@ exports.commentNotification = catchAsync(async (req, res, next) => {
 });
 
 exports.puschCommentNotification = catchAsync(async (req, res, next) => {
-  const payload = JSON.stringify({
-    title: `New comment`,
-    content: {
-      body: `${req.user.name} commented on a post you are following`,
-      icon: 'https://reaflect-public.s3.eu-north-1.amazonaws.com/logo.png',
-    },
-    redirectData: { club: req.post.club, post: req.comment.post },
-  });
+  if (req.pushNotification) {
+    const payload = JSON.stringify({
+      title: `New comment`,
+      content: {
+        body: `${req.user.name} commented on a post you are following`,
+        icon: 'https://reaflect-public.s3.eu-north-1.amazonaws.com/logo.png',
+      },
+      redirectData: { club: req.post.club, post: req.comment.post },
+    });
 
-  req.post.subscriptions.forEach(subscription => {
-    if (req.user.subscription.endpoint !== subscription.endpoint) {
-      webpush
-        .sendNotification(subscription, payload)
-        .catch(err => new AppError(err));
-    }
-  });
+    req.post.subscriptions.forEach(subscription => {
+      if (req.user.subscription.endpoint !== subscription.endpoint) {
+        webpush
+          .sendNotification(subscription, payload)
+          .catch(err => new AppError(err));
+      }
+    });
+  }
 
   res.status(201).send({
     status: 'success',
