@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 const Clubs = require('../models/clubModel');
 const Users = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
@@ -96,10 +97,9 @@ exports.createClub = catchAsync(async (req, res, next) => {
 
   await Users.findByIdAndUpdate(req.user._id, { $push: { clubs: club._id } });
 
-  res.status(201).json({
-    message: 'Success',
-    data: club,
-  });
+  req.club = club;
+
+  next();
 });
 
 exports.inviteUsers = catchAsync(async (req, res, next) => {
@@ -121,6 +121,7 @@ exports.clubInvitesAnswer = catchAsync(async (req, res, next) => {
   const { user } = req;
   const { club, accepted } = req.body;
   let acceptedClubQuery;
+  let acceptedClub;
 
   user.invites.splice(user.invites.indexOf(club), 1);
 
@@ -138,12 +139,11 @@ exports.clubInvitesAnswer = catchAsync(async (req, res, next) => {
 
   acceptedClubQuery = populateClub(acceptedClubQuery);
 
-  const acceptedClub = await acceptedClubQuery;
+  acceptedClub = await acceptedClubQuery;
 
-  res.status(201).json({
-    message: 'success',
-    data: acceptedClub,
-  });
+  req.club = acceptedClub;
+
+  next();
 });
 
 exports.getClub = catchAsync(async (req, res, next) => {

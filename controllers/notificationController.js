@@ -1,11 +1,12 @@
+/* eslint-disable no-use-before-define */
 /* eslint-disable no-await-in-loop */
 const webpush = require('web-push');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-const APIFeatures = require('./../utils/apiFeatures');
 
 const User = require('./../models/userModel');
 const Post = require('./../models/postModel');
+const Club = require('./../models/clubModel');
 const Notifications = require('../models/notificationModel');
 
 const publicVapidKey = process.env.WEB_PUSH_PUBLIC_KEY;
@@ -18,23 +19,13 @@ webpush.setVapidDetails(
 );
 
 exports.subscribe = catchAsync(async (req, res, next) => {
-  // Get pushSubscription object
   const subscription = req.body;
   await User.findByIdAndUpdate(req.user._id, { subscription });
 
-  // Send 201 - when resource created
   res.status(201).json({});
 });
 
-// exports.notificationSocket = catchAsync(async (req, res, next) => {
-//   req.app.io.emit('notification', { message: 'test message' });
-
-//   res.status(200).json({
-//     message: 'Success',
-//   });
-// });
-
-exports.postNotification = (req, res, next) => {
+exports.postPushNotification = (req, res, next) => {
   // Create payload
   const payload = JSON.stringify({ title: 'Push Test' });
 
@@ -112,8 +103,50 @@ exports.commentNotification = catchAsync(async (req, res, next) => {
 
   next();
 });
+exports.postNotification = catchAsync(async (req, res, next) => {
+  const club = await Club.findById(req.body.club);
+  const usersToNotify = club.subscriptions.map(
+    subscription => subscription.user
+  );
 
-exports.puschCommentNotification = catchAsync(async (req, res, next) => {
+  for (let i = 0; i < usersToNotify.length; i += 1) {
+    const existingNotifications = await Notifications.find({
+      createdBy: req.user._id,
+      read: false,
+      club: club._id,
+      receiver: usersToNotify[i],
+    });
+    if (
+      !existingNotifications.length &&
+      `${usersToNotify[i]}` !== `${req.user._id}`
+    ) {
+      const notification = await Notifications.create({
+        type: 'post',
+        createdBy: {
+          _id: req.user._id,
+          name: req.user.name,
+          photo: req.user.photo,
+        },
+        receiver: usersToNotify[i],
+        club: club._id,
+      });
+
+      req.app.io.emit(`notification ${usersToNotify[i]}`, {
+        notifications: notification,
+      });
+      req.pushNotification = true;
+    } else {
+      req.pushNotification = false;
+    }
+  }
+
+  res.status(201).send({
+    status: 'success',
+    data: req.post,
+  });
+});
+
+exports.pushCommentNotification = catchAsync(async (req, res, next) => {
   if (req.pushNotification) {
     const payload = JSON.stringify({
       title: `New comment`,
@@ -158,6 +191,31 @@ exports.setSubscriptionOnPost = catchAsync(async (req, res, next) => {
   }
 
   next();
+});
+
+exports.setSubscriptionOnClub = catchAsync(async (req, res, next) => {
+  const id = req.body.club || req.club._id;
+  const club = await Club.findById(id);
+  if (
+    !club.subscriptions.find(
+      subscription => subscription.endpoint === req.user.subscription.endpoint
+    )
+  ) {
+    await Club.findByIdAndUpdate(
+      { _id: club._id },
+      {
+        $addToSet: {
+          subscriptions: { ...req.user.subscription, user: req.user._id },
+        },
+      },
+      { new: true }
+    );
+  }
+
+  res.status(201).json({
+    message: 'Success',
+    data: req.club,
+  });
 });
 
 exports.setReadOnNotification = catchAsync(async (req, res, next) => {

@@ -20,7 +20,7 @@ router
     commentController.addComment,
     notificationController.setSubscriptionOnPost,
     notificationController.commentNotification,
-    notificationController.puschCommentNotification
+    notificationController.pushCommentNotification
   );
 
 router
