@@ -18,7 +18,11 @@ exports.setS3Config = (req, res, next) => {
 };
 
 exports.getAllPosts = factory.getAll(Posts);
-exports.getPost = factory.getOne(Posts);
+exports.getPost = factory.getOne(Posts, {
+  path: 'user',
+  model: 'User',
+  select: ['name', 'photo'],
+});
 exports.deletePost = factory.deleteOne(Posts);
 
 exports.updatePost = catchAsync(async (req, res, next) => {

@@ -25,7 +25,7 @@ router
   );
 
 router
-  .route('/:id')
+  .route('/:clubId/:id')
   .get(postController.getPost)
   .patch(
     postController.setS3Config,
