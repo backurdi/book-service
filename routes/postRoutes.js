@@ -12,7 +12,7 @@ router.use(authController.protect);
 router.use('/:postId/comments', commentRouter);
 
 router
-  .route('/')
+  .route('/:clubId?')
   .get(postController.getAllPosts)
   .post(
     postController.setS3Config,

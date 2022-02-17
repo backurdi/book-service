@@ -89,9 +89,9 @@ exports.commentNotification = catchAsync(async (req, res, next) => {
         },
         receiver: usersToNotify[i],
         post: req.comment.post,
+        club: post.club,
       });
 
-      notification.post.club = post.club;
       req.app.io.emit(`notification ${usersToNotify[i]}`, {
         notifications: notification,
       });
