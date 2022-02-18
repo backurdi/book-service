@@ -110,6 +110,7 @@ exports.postNotification = catchAsync(async (req, res, next) => {
   );
 
   for (let i = 0; i < usersToNotify.length; i += 1) {
+    console.log(usersToNotify[i]);
     const existingNotifications = await Notifications.find({
       createdBy: req.user._id,
       read: false,
@@ -143,6 +144,7 @@ exports.postNotification = catchAsync(async (req, res, next) => {
   res.status(201).send({
     status: 'success',
     data: req.post,
+    notificationSentTo: usersToNotify,
   });
 });
 
