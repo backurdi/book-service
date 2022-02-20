@@ -42,12 +42,6 @@ exports.getNotifications = catchAsync(async (req, res, next) => {
 
   notificationsQuery = paginate(notificationsQuery, req.query);
 
-  notificationsQuery.populate({
-    path: 'post',
-    model: 'Posts',
-    select: ['club'],
-  });
-
   const notifications = await notificationsQuery;
   const count = await Notifications.find({
     receiver: req.user._id,

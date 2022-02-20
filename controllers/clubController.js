@@ -5,6 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const { setConfigVars } = require('../utils/s3');
 const AppError = require('../utils/appError');
+const Posts = require('../models/postModel');
 
 exports.setUserId = (req, res, next) => {
   if (!req.body.user) req.body.user = req.user.id;
@@ -160,31 +161,6 @@ exports.getClub = catchAsync(async (req, res, next) => {
 
 function populateClub(populateQuery) {
   populateQuery = populateQuery.populate('books');
-  populateQuery = populateQuery.populate({
-    path: 'posts',
-    model: 'Posts',
-    options: { sort: { createdAt: -1 } },
-    populate: {
-      path: 'comments',
-      model: 'Comments',
-      populate: {
-        path: 'user',
-        model: 'User',
-        select: ['name', 'photo'],
-      },
-      options: { sort: { createdAt: 1 } },
-    },
-  });
-  populateQuery = populateQuery.populate({
-    path: 'posts',
-    model: 'Posts',
-    options: { sort: { createdAt: -1 } },
-    populate: {
-      path: 'user',
-      model: 'User',
-      select: ['name', 'photo'],
-    },
-  });
   populateQuery = populateQuery.populate('members');
 
   return populateQuery;

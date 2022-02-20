@@ -71,6 +71,12 @@ exports.getAll = Model =>
     }
 
     const query = Model.find(filter).sort({ createdAt: -1 });
+    if (req.query.page) {
+      query.skip(req.query.page);
+    }
+    if (req.query.limit) {
+      query.limit(+req.query.limit);
+    }
     query.populate({
       path: 'user',
       model: 'User',

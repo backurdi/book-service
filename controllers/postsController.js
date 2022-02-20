@@ -17,7 +17,50 @@ exports.setS3Config = (req, res, next) => {
   next();
 };
 
-exports.getAllPosts = factory.getAll(Posts);
+exports.getAllPosts = catchAsync(async (req, res, next) => {
+  //To allow for nested GET reviews on tour (hack)
+  let filter = {};
+  if (req.params.clubId) {
+    filter = {
+      club: req.params.clubId,
+    };
+  }
+
+  const count = await Posts.find(filter).count();
+
+  const query = Posts.find(filter).sort({ createdAt: -1 });
+  if (req.query.page) {
+    const skip = (req.query.page - 1) * req.query.limit;
+    query.skip(skip);
+  }
+  if (req.query.limit) {
+    query.limit(+req.query.limit);
+  }
+  query.populate({
+    path: 'user',
+    model: 'User',
+    select: ['name', 'photo'],
+  });
+
+  query.populate({
+    path: 'comments',
+    model: 'Comments',
+    populate: {
+      path: 'user',
+      model: 'User',
+      select: ['name', 'photo'],
+    },
+    options: { sort: { createdAt: 1 } },
+  });
+  const doc = await query;
+
+  res.status(200).json({
+    status: 'success',
+    count,
+    data: doc,
+  });
+});
+
 exports.getPost = factory.getOne(Posts, {
   path: 'user',
   model: 'User',
