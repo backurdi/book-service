@@ -11,6 +11,14 @@ const nofificationSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'Clubs',
   },
+  isAssignment: {
+    type: Boolean,
+    default: false,
+  },
+  isAssignmentDone: {
+    type: Boolean,
+    default: false,
+  },
   createdBy: {
     type: {
       _id: { type: mongoose.Schema.ObjectId, ref: 'Users' },

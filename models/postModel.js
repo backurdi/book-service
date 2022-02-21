@@ -17,12 +17,22 @@ const postSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'Clubs',
     },
-    user: {
+    owner: {
       type: mongoose.Schema.ObjectId,
       ref: 'Users',
-      required: [true, 'comment must have a user'],
+      required: [true, 'comment must have a owner'],
     },
     photo: String,
+    isAssignment: {
+      type: Boolean,
+      default: false,
+    },
+    finishedAssignment: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Users',
+      },
+    ],
     createdAt: {
       required: true,
       type: Date,

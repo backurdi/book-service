@@ -114,13 +114,15 @@ exports.createPost = catchAsync(async (req, res, next) => {
     req.body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
   }
 
+  req.body.owner = req.user._id;
+
   const newPost = await Posts.create(req.body);
 
   await Posts.findByIdAndUpdate(
     { _id: newPost._id },
     {
       $addToSet: {
-        subscriptions: { ...req.user.subscription, user: req.user._id },
+        subscriptions: { ...req.user.subscriptions, user: req.user._id },
       },
     },
     { new: true }

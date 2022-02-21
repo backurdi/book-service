@@ -33,14 +33,16 @@ const userSchema = new mongoose.Schema({
   //   image:{type:String},
   //   books:[{name:{type:String}, image:{type:String}}]
   // }],
-  subscription: {
-    endpoint: { type: String, unique: false, required: false },
-    expirationTime: { type: Number, required: false },
-    keys: {
-      auth: String,
-      p256dh: String,
+  subscriptions: [
+    {
+      endpoint: { type: String, unique: false, required: false },
+      expirationTime: { type: Number, required: false },
+      keys: {
+        auth: String,
+        p256dh: String,
+      },
     },
-  },
+  ],
   password: {
     type: String,
     required: [true, 'Please provide a password'],

@@ -19,8 +19,22 @@ webpush.setVapidDetails(
 );
 
 exports.subscribe = catchAsync(async (req, res, next) => {
-  const subscription = req.body;
-  await User.findByIdAndUpdate(req.user._id, { subscription });
+  const user = User.findById(req.user._id);
+  if (
+    user.subscriptions &&
+    user.subscriptions.find(
+      subscription => subscription.endpoint === req.body.endpoint
+    )
+  ) {
+    await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { $push: { subscriptions: req.body } }
+    );
+  } else {
+    await User.findByIdAndUpdate(req.user._id, {
+      subscriptions: [req.body],
+    });
+  }
 
   res.status(201).json({});
 });
@@ -31,7 +45,7 @@ exports.postPushNotification = (req, res, next) => {
 
   // Pass object into sendNotification
   webpush
-    .sendNotification(req.user.subscription, payload)
+    .sendNotification(req.user.subscriptions, payload)
     .catch(err => new AppError(err));
 };
 
@@ -99,6 +113,7 @@ exports.commentNotification = catchAsync(async (req, res, next) => {
 });
 exports.postNotification = catchAsync(async (req, res, next) => {
   const club = await Club.findById(req.body.club);
+  req.club = club;
   const usersToNotify = club.subscriptions.map(
     subscription => subscription.user
   );
@@ -121,19 +136,18 @@ exports.postNotification = catchAsync(async (req, res, next) => {
           name: req.user.name,
           photo: req.user.photo,
         },
+        isAssignment: req.post.isAssignment,
         receiver: usersToNotify[i],
         club: club._id,
+        post: req.post._id,
       });
 
       req.app.io.emit(`notification ${usersToNotify[i]}`, {
         notifications: notification,
       });
-      req.pushNotification = true;
-    } else {
-      req.pushNotification = false;
+      pushPostNotification(req.user, req.post, req.club);
     }
   }
-
   res.status(201).send({
     status: 'success',
     data: req.post,
@@ -152,7 +166,7 @@ exports.pushCommentNotification = catchAsync(async (req, res, next) => {
     });
 
     req.post.subscriptions.forEach(subscription => {
-      if (req.user.subscription.endpoint !== subscription.endpoint) {
+      if (req.user.subscriptions.endpoint !== subscription.endpoint) {
         webpush
           .sendNotification(subscription, payload)
           .catch(err => new AppError(err));
@@ -166,18 +180,40 @@ exports.pushCommentNotification = catchAsync(async (req, res, next) => {
   });
 });
 
+const pushPostNotification = catchAsync(async (user, post, club) => {
+  const payload = JSON.stringify({
+    title: `New post`,
+    content: {
+      body: `${user.name} has posted in a club you are part of`,
+      icon: 'https://reaflect-public.s3.eu-north-1.amazonaws.com/logo.png',
+    },
+    redirectData: { club: post.club, post: post._id },
+  });
+  club.subscriptions.forEach(subscription => {
+    if (
+      !user.subscriptions.find(
+        userSubscription => userSubscription.endpoint === subscription.endpoint
+      )
+    ) {
+      webpush
+        .sendNotification(subscription, payload)
+        .catch(err => new AppError(err));
+    }
+  });
+});
+
 exports.setSubscriptionOnPost = catchAsync(async (req, res, next) => {
   const post = await Post.findById(req.body.post);
   if (
     !post.subscriptions.find(
-      subscription => subscription.endpoint === req.user.subscription.endpoint
+      subscription => subscription.endpoint === req.user.subscriptions.endpoint
     )
   ) {
     await Post.findByIdAndUpdate(
       { _id: post._id },
       {
         $addToSet: {
-          subscriptions: { ...req.user.subscription, user: req.user._id },
+          subscriptions: { ...req.user.subscriptions, user: req.user._id },
         },
       },
       { new: true }
@@ -191,19 +227,26 @@ exports.setSubscriptionOnClub = catchAsync(async (req, res, next) => {
   const id = req.body.club || req.club._id;
   const club = await Club.findById(id);
   if (
-    !club.subscriptions.find(
-      subscription => subscription.endpoint === req.user.subscription.endpoint
+    !club.subscriptions?.find(subscription =>
+      req.user.subscriptions.includes(subscription?.endpoint)
     )
   ) {
-    await Club.findByIdAndUpdate(
-      { _id: club._id },
-      {
-        $addToSet: {
-          subscriptions: { ...req.user.subscription, user: req.user._id },
+    for (let i = 0; i < req.user.subscriptions.length; i++) {
+      await Club.findByIdAndUpdate(
+        { _id: club._id },
+        {
+          $addToSet: {
+            subscriptions: {
+              endpoint: req.user.subscriptions[i].endpoint,
+              keys: req.user.subscriptions[i].keys,
+              expirationTime: req.user.subscriptions[i].expirationTime,
+              user: req.user._id,
+            },
+          },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
+    }
   }
 
   res.status(201).json({
@@ -216,8 +259,6 @@ exports.setReadOnNotification = catchAsync(async (req, res, next) => {
   const notification = await Notifications.findByIdAndUpdate(req.params.id, {
     read: true,
   });
-
-  console.log(notification);
 
   res.status(201).json({
     message: 'notification updated',

@@ -18,6 +18,7 @@ router
     photoMidleware.uploadToS3,
     commentController.setPostUserIds,
     commentController.addComment,
+    commentController.setAssignmentDone,
     notificationController.setSubscriptionOnPost,
     notificationController.commentNotification,
     notificationController.pushCommentNotification

@@ -1,62 +1,83 @@
 const Comments = require('../models/commentModel');
+const Posts = require('../models/postModel');
+const Notifications = require('../models/notificationModel');
 const factory = require('./handlerFactory');
-const {setConfigVars} = require('../utils/s3');
+const { setConfigVars } = require('../utils/s3');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 exports.setPostUserIds = (req, res, next) => {
-    if (!req.body.post) req.body.post = req.params.postId;
-    if (!req.body.user) req.body.user = req.user.id;
+  if (!req.body.post) req.body.post = req.params.postId;
+  if (!req.body.user) req.body.user = req.user.id;
 
-    next();
+  next();
 };
 
-exports.setS3Config = (req, res, next)=>{
-    setConfigVars('postPicture');
-    req.s3FileName = 'comment';
+exports.setS3Config = (req, res, next) => {
+  setConfigVars('postPicture');
+  req.s3FileName = 'comment';
 
-    next();
-}
+  next();
+};
 
 exports.getComments = factory.getAll(Comments);
-exports.addComment = factory.createOne(Comments);
 exports.deleteComment = factory.deleteOne(Comments);
 
-exports.addComment = catchAsync(async(req, res, next)=>{
-    if(req.photo){
-        req.body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
-    }
-    const newComment = await Comments.create(req.body);
-    
-    const doc = await Comments.findById(newComment._id).populate({
-        path:'user',
-        model:'User',
-        select:['name', 'photo']
-    })
-    
-    req.comment = doc;
-    next()
-})
+exports.addComment = catchAsync(async (req, res, next) => {
+  if (req.photo) {
+    req.body.photo = `${req.protocol}://${req.headers.host}/api/v1/images/${req.photo}`;
+  }
+  const newComment = await Comments.create(req.body);
 
-exports.updateComment = catchAsync(async (req, res, next)=>{
-    if(req.photo){
-        req.body.photo = `https://redee-post-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
-    }
-    const doc = await Comments.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true
-    }).populate({
-        path:'user',
-        model: 'User',
-        select:['name', 'photo']
-    });
+  const doc = await Comments.findById(newComment._id).populate({
+    path: 'user',
+    model: 'User',
+    select: ['name', 'photo'],
+  });
 
-    if (!doc) {
-        return next(new AppError('No document found with that ID', 404));
-    }
+  req.comment = doc;
+  next();
+});
 
-    res.status(200).json({
-        status: 'success',
-        data: doc
-    });
-})
+exports.updateComment = catchAsync(async (req, res, next) => {
+  if (req.photo) {
+    req.body.photo = `https://redee-post-pictures.s3.eu-north-1.amazonaws.com/${req.photo}`;
+  }
+  const doc = await Comments.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  }).populate({
+    path: 'user',
+    model: 'User',
+    select: ['name', 'photo'],
+  });
+
+  if (!doc) {
+    return next(new AppError('No document found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: doc,
+  });
+});
+
+exports.setAssignmentDone = catchAsync(async (req, res, next) => {
+  const post = await Posts.findById(req.comment.post);
+
+  if (!post.isAssignment) {
+    next();
+  }
+
+  if (post.isAssignment && !post.isAssignmentDone) {
+    await Posts.findOneAndUpdate(
+      { _id: req.comment.post },
+      { $push: { finishedAssignment: req.user._id } }
+    );
+    await Notifications.findOneAndUpdate(
+      { type: 'post', post: req.comment.post },
+      { isAssignmentDone: true }
+    );
+  }
+  next();
+});
