@@ -37,7 +37,7 @@ exports.getAllPosts = catchAsync(async (req, res, next) => {
     query.limit(+req.query.limit);
   }
   query.populate({
-    path: 'user',
+    path: 'owner',
     model: 'User',
     select: ['name', 'photo'],
   });
