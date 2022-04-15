@@ -42,8 +42,7 @@ app.set('view engine', 'pug');
 //       next();
 //     }
 // };
-const origins = process.env.URL.split(',').map(origin => origin.trim());
-console.log(origins);
+const origins = process.env.URL.split(', ');
 app.use(cors({ origin: origins, credentials: true }));
 // app.options('*', cors());
 
