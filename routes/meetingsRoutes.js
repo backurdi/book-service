@@ -3,6 +3,7 @@ const mailjet = require('node-mailjet').connect(
   process.env.MAILJET_PUBLIC,
   process.env.MAILJET_PRIVATE
 );
+const Meetings = require('../models/meetingModel');
 const catchAsync = require('../utils/catchAsync');
 
 const router = express.Router();
@@ -10,7 +11,8 @@ const router = express.Router();
 router.post(
   '/',
   catchAsync(async (req, res, next) => {
-    if (req.body.mail) {
+    const emailExist = await Meetings.findOne({ mail: req.body.mail });
+    if (req.body.mail && !emailExist) {
       const request = mailjet.post('send', { version: 'v3.1' }).request({
         Messages: [
           {
@@ -30,16 +32,24 @@ router.post(
         ],
       });
       request
-        .then(result => {
-          console.log(result.body);
-          res.status(200).json('success');
+        .then(async result => {
+          await Meetings.create(req.body);
+          res.status(200).json({
+            exist: false,
+            message:
+              'Awsome, you will be notified when the future of meetins is here',
+          });
         })
         .catch(err => {
           console.log(err);
           res.status(200).json('failed');
         });
     } else {
-      res.status(404).json('no email');
+      res.status(200).json({
+        exist: true,
+        message:
+          'You have already subscribed, if you have not recieved your confirmation please check your spam folder',
+      });
     }
   })
 );
