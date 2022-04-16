@@ -17,13 +17,12 @@ router.post(
         Messages: [
           {
             From: {
-              Email: 'bachir.kurdi@gmail.com',
-              Name: 'Bachir',
+              Email: 'info@domeetingsright.com',
+              Name: 'Bachir Kurdi',
             },
             To: [
               {
                 Email: req.body.mail,
-                Name: 'Bachir',
               },
             ],
             Subject: 'Welcome to the new generation of meetings',
