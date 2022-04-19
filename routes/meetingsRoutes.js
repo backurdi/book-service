@@ -36,7 +36,7 @@ router.post(
           res.status(200).json({
             exist: false,
             message:
-              'Awsome, you will be notified when the future of meetins is here',
+              'Awesome, you will be notified when the future of meetings is here.',
           });
         })
         .catch(err => {
@@ -47,7 +47,7 @@ router.post(
       res.status(200).json({
         exist: true,
         message:
-          'You have already subscribed, if you have not recieved your confirmation please check your spam folder',
+          'You have already subscribed, if you have not received your confirmation please check your spam folder.',
       });
     }
   })
